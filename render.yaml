@@ -1,27 +1,36 @@
 services:
-  # 1. Python Backend
+  # Backend API Service
   - type: web
-    name: delhi-backend-api
+    name: delhi-business-backend
     runtime: python
     region: singapore
     plan: free
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: cd backend && gunicorn app:app
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
-        value: 3.10.0
+        value: 3.11.0
+    healthCheckPath: /
 
-  # 2. React Frontend
+  # Frontend Static Site
   - type: web
-    name: delhi-unified-frontend
-    runtime: node
+    name: delhi-business-frontend
+    runtime: static
     region: singapore
     plan: free
-    buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && npm run preview -- --host 0.0.0.0 --port $PORT
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
     envVars:
       - key: VITE_BACKEND_URL
         fromService:
           type: web
-          name: delhi-backend-api
+          name: delhi-business-backend
           property: url
+      - key: VITE_MAPS_REIMAGINED_URL
+        value: https://maps-reimagined-frontend.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
