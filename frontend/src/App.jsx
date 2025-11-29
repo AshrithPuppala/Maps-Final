@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 import { MapPin, Search, Loader2, TrendingUp, AlertTriangle, Key, DollarSign, Building2 } from 'lucide-react';
 import * as API from './services/api';
 
+// Use environment variable for backend URL, fallback to localhost for dev
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
 export default function App() {
@@ -18,11 +19,9 @@ export default function App() {
   const [scoutData, setScoutData] = useState(null);
   const [predictData, setPredictData] = useState(null);
   const [mapPins, setMapPins] = useState([]);
-  
-  // State for Map Polygons
   const [geoData, setGeoData] = useState({ city: null, area: null });
 
-  // 1. Load Map Shapes on Mount
+  // 1. LOAD MAP DATA ON MOUNT
   useEffect(() => {
     const fetchGeoData = async () => {
       try {
@@ -30,7 +29,11 @@ export default function App() {
            fetch('/delhi_city.geojson'), 
            fetch('/delhi_area.geojson') 
         ]);
-        setGeoData({ city: await cityRes.json(), area: await areaRes.json() });
+        if(cityRes.ok && areaRes.ok) {
+            setGeoData({ city: await cityRes.json(), area: await areaRes.json() });
+        } else {
+            console.error("Failed to load map polygons. Ensure files are in frontend/public/");
+        }
       } catch (e) { console.error("Map Data Load Error:", e); }
     };
     fetchGeoData();
@@ -57,6 +60,7 @@ export default function App() {
     setPredictData(null);
 
     try {
+      // 2. PARALLEL API CALLS
       const [osmCompetitors, flaskResponse] = await Promise.all([
         API.fetchCompetitors(selectedLocation.lat, selectedLocation.lng, inputs.type),
         fetch(`${BACKEND_URL}/predict`, {
@@ -68,25 +72,29 @@ export default function App() {
                 investment: inputs.budget,
                 type: inputs.type 
             })
-        }).then(r => r.json())
+        }).then(r => r.json()).catch(err => ({ analysis: null })) // Fallback if backend fails
       ]);
 
+      // 3. GEMINI AI ENRICHMENT (Works even if osmCompetitors is empty)
       const geminiAnalysis = await API.analyzeWithGemini(
         inputs.apiKey, inputs.type, selectedLocation.lat, selectedLocation.lng, selectedLocation.name, osmCompetitors
       );
 
-      const finalPins = osmCompetitors.map(real => {
-         const aiInfo = geminiAnalysis.competitors_enriched?.find(ai => ai.name === real.name) || {};
-         return { ...real, ...aiInfo };
-      });
+      // 4. MERGE DATA FOR PINS
+      const finalPins = osmCompetitors.length > 0 
+        ? osmCompetitors.map(real => {
+             const aiInfo = geminiAnalysis.competitors_enriched?.find(ai => ai.name === real.name) || {};
+             return { ...real, ...aiInfo };
+          })
+        : []; // No pins if no real OSM data, but Sidebar will still show AI estimates
 
       setMapPins(finalPins);
       setScoutData({ ...geminiAnalysis, finalPins });
-      setPredictData(flaskResponse.analysis);
+      setPredictData(flaskResponse?.analysis || null);
 
     } catch (e) {
       console.error(e);
-      alert("Analysis failed. Check API Key or Backend connection.");
+      alert("Analysis failed. Please check your API Key.");
     } finally {
       setLoading(false);
     }
@@ -95,7 +103,7 @@ export default function App() {
   return (
     <div className="flex h-screen bg-slate-950 text-white font-sans overflow-hidden">
       
-      {/* SIDEBAR */}
+      {/* --- SIDEBAR --- */}
       <div className="w-[450px] flex flex-col border-r border-slate-800 bg-slate-900/95 backdrop-blur z-20 shadow-2xl">
         <div className="p-6 border-b border-slate-800">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
@@ -105,6 +113,7 @@ export default function App() {
         </div>
 
         <div className="p-6 space-y-4 border-b border-slate-800 bg-slate-900">
+           {/* API Key */}
            <div className="relative">
              <Key className="absolute left-3 top-2.5 w-4 h-4 text-slate-500"/>
              <input type="password" placeholder="Gemini API Key" value={inputs.apiKey} 
@@ -113,6 +122,7 @@ export default function App() {
              />
            </div>
 
+           {/* Location Search */}
            <div className="relative">
              <MapPin className="absolute left-3 top-2.5 w-4 h-4 text-slate-500"/>
              <input type="text" placeholder="Search Location (e.g. Connaught Place)" value={inputs.query}
@@ -148,6 +158,7 @@ export default function App() {
            </button>
         </div>
 
+        {/* RESULTS AREA */}
         {scoutData && (
           <div className="flex-1 flex flex-col min-h-0">
             <div className="flex border-b border-slate-800">
@@ -186,7 +197,8 @@ export default function App() {
 
                   <div>
                     <h3 className="text-sm font-bold text-slate-300 mb-3">Top Competitors</h3>
-                    {scoutData.finalPins.map((c, i) => (
+                    {scoutData.finalPins.length > 0 ? (
+                      scoutData.finalPins.map((c, i) => (
                       <div key={i} className="flex justify-between items-center p-3 mb-2 bg-slate-800 rounded-lg border border-slate-700">
                         <div>
                           <div className="font-medium text-sm text-white">{c.name}</div>
@@ -197,12 +209,23 @@ export default function App() {
                           <span className="text-xs font-bold">{c.rating}</span>
                         </div>
                       </div>
+                    ))) : (
+                      <div className="text-xs text-slate-500 italic p-4 text-center">
+                        No realtime map data found. Displaying AI estimates below.
+                      </div>
+                    )}
+                    
+                    {/* Fallback list if no map pins found */}
+                    {scoutData.finalPins.length === 0 && scoutData.competitors_enriched?.map((c, i) => (
+                       <div key={i} className="flex justify-between items-center p-3 mb-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                        <div><div className="font-medium text-sm text-slate-300">{c.name}</div></div>
+                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {activeTab === 'predict' && predictData && (
+              {activeTab === 'predict' && predictData ? (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
@@ -238,13 +261,17 @@ export default function App() {
                     <p className="text-center text-xs text-slate-500 mt-2">3-Year Growth Projection</p>
                   </div>
                 </div>
+              ) : ( activeTab === 'predict' && 
+                <div className="text-center p-8 text-slate-500 text-sm">
+                   Backend data unavailable. Ensure the Python server is running.
+                </div>
               )}
             </div>
           </div>
         )}
       </div>
 
-      {/* MAP AREA */}
+      {/* --- MAP AREA --- */}
       <div className="flex-1 relative bg-black">
         {selectedLocation ? (
           <Map
@@ -267,7 +294,7 @@ export default function App() {
               </Marker>
             ))}
 
-            {/* Map Polygons Layer */}
+            {/* Map Polygons (Visual Context) */}
             {geoData.city && (
               <Source id="delhi-city" type="geojson" data={geoData.city}>
                 <Layer id="city-fill" type="fill" paint={{ 'fill-color': '#3b82f6', 'fill-opacity': 0.05 }} />
