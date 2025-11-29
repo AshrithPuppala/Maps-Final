@@ -4,7 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { MapPin, Search, Loader2, TrendingUp, AlertTriangle, Key, DollarSign, Building2, Map as MapIcon, Calendar, Target } from 'lucide-react';
 import * as API from './services/api';
-import { API_CONFIG } from './config/api';
+import { API_CONFIG } from './services/api';
 
 const BACKEND_URL = API_CONFIG.BACKEND_URL;
 
