@@ -1,27 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import Map, { NavigationControl, Marker, Popup } from 'react-map-gl/maplibre';
+import Map, { NavigationControl, Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { MapPin, Search, Loader2, TrendingUp, AlertTriangle, Building2, Key, DollarSign } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { MapPin, Search, Loader2, TrendingUp, AlertTriangle, Key, DollarSign, Building2 } from 'lucide-react';
 import * as API from './services/api';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
 export default function App() {
-  // --- STATE ---
   const [inputs, setInputs] = useState({ query: '', type: 'Restaurant', budget: '2000000', apiKey: '' });
   const [suggestions, setSuggestions] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState(null); // { lat, lng, name }
+  const [selectedLocation, setSelectedLocation] = useState(null);
   
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('scout'); // 'scout' | 'predict'
+  const [activeTab, setActiveTab] = useState('scout'); 
   
-  // Results
-  const [scoutData, setScoutData] = useState(null); // Map, Competitors, SWOT
-  const [predictData, setPredictData] = useState(null); // Risk, ROI
+  const [scoutData, setScoutData] = useState(null);
+  const [predictData, setPredictData] = useState(null);
   const [mapPins, setMapPins] = useState([]);
+  const [geoData, setGeoData] = useState({ city: null, area: null });
 
-  // --- HANDLERS ---
+  // Load Map Polygons
+  useEffect(() => {
+    const fetchGeoData = async () => {
+      try {
+        const [cityRes, areaRes] = await Promise.all([
+           fetch('/delhi_city.geojson'), 
+           fetch('/delhi_area.geojson') 
+        ]);
+        setGeoData({ city: await cityRes.json(), area: await areaRes.json() });
+      } catch (e) { console.error("Map Data Load Error:", e); }
+    };
+    fetchGeoData();
+  }, []);
+
   const handleSearch = async (q) => {
     setInputs(prev => ({ ...prev, query: q }));
     if(q.length > 2) {
@@ -43,7 +55,6 @@ export default function App() {
     setPredictData(null);
 
     try {
-      // 1. Parallel Execution
       const [osmCompetitors, flaskResponse] = await Promise.all([
         API.fetchCompetitors(selectedLocation.lat, selectedLocation.lng, inputs.type),
         fetch(`${BACKEND_URL}/predict`, {
@@ -58,13 +69,10 @@ export default function App() {
         }).then(r => r.json())
       ]);
 
-      // 2. Gemini Enrichment
       const geminiAnalysis = await API.analyzeWithGemini(
         inputs.apiKey, inputs.type, selectedLocation.lat, selectedLocation.lng, selectedLocation.name, osmCompetitors
       );
 
-      // 3. Merge & Set State
-      // Merge real coords with AI ratings
       const finalPins = osmCompetitors.map(real => {
          const aiInfo = geminiAnalysis.competitors_enriched?.find(ai => ai.name === real.name) || {};
          return { ...real, ...aiInfo };
@@ -85,10 +93,8 @@ export default function App() {
   return (
     <div className="flex h-screen bg-slate-950 text-white font-sans overflow-hidden">
       
-      {/* LEFT SIDEBAR (Controls & Results) */}
+      {/* SIDEBAR */}
       <div className="w-[450px] flex flex-col border-r border-slate-800 bg-slate-900/95 backdrop-blur z-20 shadow-2xl">
-        
-        {/* Header */}
         <div className="p-6 border-b border-slate-800">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
             Delhi Business Suite
@@ -96,9 +102,7 @@ export default function App() {
           <p className="text-xs text-slate-400 mt-1">Integrated Market Intelligence</p>
         </div>
 
-        {/* Input Form */}
         <div className="p-6 space-y-4 border-b border-slate-800 bg-slate-900">
-           {/* API Key */}
            <div className="relative">
              <Key className="absolute left-3 top-2.5 w-4 h-4 text-slate-500"/>
              <input type="password" placeholder="Gemini API Key" value={inputs.apiKey} 
@@ -107,7 +111,6 @@ export default function App() {
              />
            </div>
 
-           {/* Location Search */}
            <div className="relative">
              <MapPin className="absolute left-3 top-2.5 w-4 h-4 text-slate-500"/>
              <input type="text" placeholder="Search Location (e.g. Connaught Place)" value={inputs.query}
@@ -115,9 +118,9 @@ export default function App() {
                className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2 pl-9 pr-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
              />
              {suggestions.length > 0 && (
-               <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl">
+               <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl cursor-pointer">
                  {suggestions.map((s,i) => (
-                   <div key={i} onClick={() => handleSelect(s)} className="p-2 hover:bg-slate-700 cursor-pointer text-sm px-4">
+                   <div key={i} onClick={() => handleSelect(s)} className="p-2 hover:bg-slate-700 text-sm px-4">
                      {s.name}
                    </div>
                  ))}
@@ -143,10 +146,8 @@ export default function App() {
            </button>
         </div>
 
-        {/* RESULT TABS */}
         {scoutData && (
           <div className="flex-1 flex flex-col min-h-0">
-            {/* Tab Headers */}
             <div className="flex border-b border-slate-800">
               <button onClick={() => setActiveTab('scout')} 
                 className={`flex-1 py-3 text-sm font-medium ${activeTab==='scout' ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/10' : 'text-slate-400 hover:text-slate-200'}`}>
@@ -158,10 +159,7 @@ export default function App() {
               </button>
             </div>
 
-            {/* Content Area */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              
-              {/* SCOUT TAB */}
               {activeTab === 'scout' && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
                   <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
@@ -202,7 +200,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* PREDICT TAB */}
               {activeTab === 'predict' && predictData && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
                   <div className="grid grid-cols-2 gap-4">
@@ -240,13 +237,12 @@ export default function App() {
                   </div>
                 </div>
               )}
-
             </div>
           </div>
         )}
       </div>
 
-      {/* RIGHT: MAP AREA */}
+      {/* MAP AREA */}
       <div className="flex-1 relative bg-black">
         {selectedLocation ? (
           <Map
@@ -256,7 +252,6 @@ export default function App() {
           >
             <NavigationControl position="top-right" />
             
-            {/* User Pin */}
             <Marker longitude={selectedLocation.lng} latitude={selectedLocation.lat} anchor="bottom">
               <div className="relative">
                 <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg animate-bounce" />
@@ -264,12 +259,23 @@ export default function App() {
               </div>
             </Marker>
 
-            {/* Competitor Pins */}
             {mapPins.map((p, i) => (
               <Marker key={i} longitude={p.lon} latitude={p.lat} anchor="bottom">
                 <MapPin className="w-6 h-6 text-red-500 fill-red-900/50 drop-shadow-md hover:scale-110 transition-transform cursor-pointer"/>
               </Marker>
             ))}
+
+            {/* Map Polygons */}
+            {geoData.city && (
+              <Source id="delhi-city" type="geojson" data={geoData.city}>
+                <Layer id="city-fill" type="fill" paint={{ 'fill-color': '#3b82f6', 'fill-opacity': 0.05 }} />
+              </Source>
+            )}
+            {geoData.area && (
+              <Source id="delhi-area" type="geojson" data={geoData.area}>
+                <Layer id="area-line" type="line" paint={{ 'line-color': '#34d399', 'line-width': 1, 'line-opacity': 0.3 }} />
+              </Source>
+            )}
           </Map>
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-slate-600">
