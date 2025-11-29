@@ -36,7 +36,7 @@ export const fetchCompetitors = async (lat, lng, type) => {
 // 3. Gemini Analysis
 export const analyzeWithGemini = async (apiKey, type, lat, lng, locationName, competitors) => {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
   
   const compNames = competitors.map(c => c.name).join(", ");
   const prompt = `Act as a Business Strategist. I'm opening a ${type} at ${locationName} (${lat},${lng}). 
