@@ -1,5 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+// API Configuration
+export const API_CONFIG = {
+  BACKEND_URL: import.meta.env.VITE_BACKEND_URL || 'https://your-backend-service.onrender.com'
+};
+
 // 1. Nominatim Geocoding
 export const searchLocationName = async (query) => {
   try {
