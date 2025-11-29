@@ -48,7 +48,37 @@ export default function App() {
       setSuggestions(results);
     }
   };
+ const [osmCompetitors, flaskResponse] = await Promise.all([
+  API.fetchCompetitors(selectedLocation.lat, selectedLocation.lng, inputs.type),
+  fetch(`${BACKEND_URL}/predict`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      lat: selectedLocation.lat, 
+      lng: selectedLocation.lng, 
+      investment: inputs.budget,
+      type: inputs.type 
+    })
+  }).then(r => r.json()).catch(() => ({ analysis: null }))
+]);
 
+// ADD THIS DEBUG LOGGING:
+console.log('🎯 Location sent to backend:', {
+  lat: selectedLocation.lat,
+  lng: selectedLocation.lng,
+  type: inputs.type
+});
+
+console.log('📊 Backend response:', flaskResponse);
+
+if (flaskResponse?.analysis) {
+  console.log('✅ Events found:', flaskResponse.analysis.events?.length || 0);
+  console.log('   Positive:', flaskResponse.analysis.positive_count);
+  console.log('   Negative:', flaskResponse.analysis.negative_count);
+  console.log('   Risk Score:', flaskResponse.analysis.risk_score);
+} else {
+  console.error('❌ No analysis data received from backend');
+}
   const handleSelect = (item) => {
     setSelectedLocation({ lat: item.lat, lng: item.lon, name: item.name });
     setInputs(prev => ({ ...prev, query: item.name }));
