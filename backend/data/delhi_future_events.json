@@ -1,0 +1,252 @@
+[
+  {
+    "id": "COMM_TECH_007",
+    "name": "Narela IT & Knowledge Park",
+    "type": "COMMERCIAL_OPENING",
+    "status": "Land Allocation",
+    "description": "Government initiative to develop Narela as the next cyber hub of Delhi. Large influx of IT workers expected.",
+    "timelines": {
+      "announcement_date": "2023-08-15",
+      "construction_start": "2025-06-01",
+      "expected_completion": "2029-01-01",
+      "impact_start": "2028-06-01"
+    },
+    "impact": {
+      "score": 0.80,
+      "sentiment": "POSITIVE",
+      "affected_sectors": ["Co-working Spaces", "PG/Hostels", "Tech Retail", "Casual Dining"],
+      "radius_meters": 2500
+    },
+    "location": {
+      "lat": 28.8426,
+      "lng": 77.0918,
+      "area_name": "Narela",
+      "pincode": "110040"
+    }
+  },
+  {
+    "id": "INST_UNI_008",
+    "name": "Guru Gobind Singh Indraprastha University (East Campus) Expansion",
+    "type": "INSTITUTIONAL_OPENING",
+    "status": "Near Completion",
+    "description": "New academic block opening. Student population in Surajmal Vihar expected to double.",
+    "timelines": {
+      "announcement_date": "2021-02-01",
+      "construction_start": "2022-05-01",
+      "expected_completion": "2026-06-01",
+      "impact_start": "2026-07-01"
+    },
+    "impact": {
+      "score": 0.65,
+      "sentiment": "POSITIVE",
+      "affected_sectors": ["Stationery", "Budget Fast Food", "Bookstores", "Gaming Cafes"],
+      "radius_meters": 1000
+    },
+    "location": {
+      "lat": 28.6600,
+      "lng": 77.2995,
+      "area_name": "Surajmal Vihar",
+      "pincode": "110092"
+    }
+  },
+  {
+    "id": "HEALTH_HOSP_009",
+    "name": "Indira Gandhi Super Speciality Hospital (Dwarka)",
+    "type": "INSTITUTIONAL_OPENING",
+    "status": "Final Touches",
+    "description": "1200-bed hospital opening. High footfall of patients, families, and medical staff.",
+    "timelines": {
+      "announcement_date": "2018-05-01",
+      "construction_start": "2019-11-01",
+      "expected_completion": "2025-10-01",
+      "impact_start": "2025-11-01"
+    },
+    "impact": {
+      "score": 0.70,
+      "sentiment": "POSITIVE",
+      "affected_sectors": ["Pharmacies", "Florists", "Budget Hotels", "Diagnostic Labs"],
+      "radius_meters": 800
+    },
+    "location": {
+      "lat": 28.5998,
+      "lng": 77.0678,
+      "area_name": "Dwarka Sector 9",
+      "pincode": "110077"
+    }
+  },
+  {
+    "id": "CONST_FLY_010",
+    "name": "Chirag Delhi Flyover Structural Repair",
+    "type": "CONSTRUCTION_WORK",
+    "status": "Tender Floated",
+    "description": "Major structural repairs required. Lane closures will cause massive bottlenecks on Outer Ring Road.",
+    "timelines": {
+      "announcement_date": "2025-02-01",
+      "construction_start": "2026-03-01",
+      "expected_completion": "2026-09-01",
+      "impact_start": "2026-03-01"
+    },
+    "impact": {
+      "score": -0.55,
+      "sentiment": "NEGATIVE",
+      "affected_sectors": ["Drive-throughs", "Delivery Services", "Car Showrooms"],
+      "radius_meters": 600
+    },
+    "location": {
+      "lat": 28.5413,
+      "lng": 77.2335,
+      "area_name": "Chirag Delhi",
+      "pincode": "110017"
+    }
+  },
+  {
+    "id": "COMM_EXPO_011",
+    "name": "Yashobhoomi Phase 2 (IICC)",
+    "type": "COMMERCIAL_OPENING",
+    "status": "Under Construction",
+    "description": "Expansion of India International Convention Centre. Will host global expos, bringing international business tourists.",
+    "timelines": {
+      "announcement_date": "2020-01-01",
+      "construction_start": "2024-01-01",
+      "expected_completion": "2027-12-01",
+      "impact_start": "2028-01-01"
+    },
+    "impact": {
+      "score": 0.90,
+      "sentiment": "POSITIVE",
+      "affected_sectors": ["Luxury Hotels", "MICE Tourism", "Fine Dining", "Souvenir Shops"],
+      "radius_meters": 4000
+    },
+    "location": {
+      "lat": 28.5668,
+      "lng": 77.0504,
+      "area_name": "Dwarka Sector 25",
+      "pincode": "110061"
+    }
+  },
+  {
+    "id": "RES_HOUSING_012",
+    "name": "DDA Housing Scheme - Rohini Sector 34",
+    "type": "RESIDENTIAL_EXPANSION",
+    "status": "Planning",
+    "description": "Development of 3000+ MIG and LIG flats. Will significantly increase local population density.",
+    "timelines": {
+      "announcement_date": "2024-12-01",
+      "construction_start": "2025-08-01",
+      "expected_completion": "2028-05-01",
+      "impact_start": "2028-06-01"
+    },
+    "impact": {
+      "score": 0.60,
+      "sentiment": "POSITIVE",
+      "affected_sectors": ["Grocery/Supermarkets", "Salons", "Tuition Centers", "Gyms"],
+      "radius_meters": 1200
+    },
+    "location": {
+      "lat": 28.7456,
+      "lng": 77.0863,
+      "area_name": "Rohini",
+      "pincode": "110085"
+    }
+  },
+  {
+    "id": "ENV_BAD_013",
+    "name": "Okhla Waste-to-Energy Plant Expansion",
+    "type": "ENVIRONMENTAL_RISK",
+    "status": "Approved",
+    "description": "Expansion of capacity. Concerns regarding air quality and smell in immediate vicinity may drive down footfall.",
+    "timelines": {
+      "announcement_date": "2024-10-01",
+      "construction_start": "2025-04-01",
+      "expected_completion": "2026-04-01",
+      "impact_start": "2026-05-01"
+    },
+    "impact": {
+      "score": -0.80,
+      "sentiment": "NEGATIVE",
+      "affected_sectors": ["Outdoor Cafes", "Residential Real Estate", "Schools"],
+      "radius_meters": 1500
+    },
+    "location": {
+      "lat": 28.5517,
+      "lng": 77.2762,
+      "area_name": "Okhla Phase 1",
+      "pincode": "110020"
+    }
+  },
+  {
+    "id": "TRANS_HUB_014",
+    "name": "Sarai Kale Khan RRTS Hub",
+    "type": "INFRASTRUCTURE_OPENING",
+    "status": "Near Completion",
+    "description": "Convergence of Delhi-Meerut, Delhi-Alwar, and Delhi-Panipat rapid rail. Massive daily commuter increase.",
+    "timelines": {
+      "announcement_date": "2019-01-01",
+      "construction_start": "2020-06-01",
+      "expected_completion": "2025-06-01",
+      "impact_start": "2025-07-01"
+    },
+    "impact": {
+      "score": 0.95,
+      "sentiment": "POSITIVE",
+      "affected_sectors": ["Transit Hotels", "Fast Food Chains", "Convenience Stores"],
+      "radius_meters": 1000
+    },
+    "location": {
+      "lat": 28.5901,
+      "lng": 77.2568,
+      "area_name": "Sarai Kale Khan",
+      "pincode": "110013"
+    }
+  },
+  {
+    "id": "CULT_HUB_015",
+    "name": "North Delhi Science Park",
+    "type": "RECREATIONAL_OPENING",
+    "status": "Proposed",
+    "description": "New science museum and park. Expected to draw school trips and families on weekends.",
+    "timelines": {
+      "announcement_date": "2025-01-01",
+      "construction_start": "2026-01-01",
+      "expected_completion": "2027-12-01",
+      "impact_start": "2028-01-01"
+    },
+    "impact": {
+      "score": 0.50,
+      "sentiment": "POSITIVE",
+      "affected_sectors": ["Ice Cream Parlors", "Toy Stores", "Family Restaurants"],
+      "radius_meters": 600
+    },
+    "location": {
+      "lat": 28.6946,
+      "lng": 77.2039,
+      "area_name": "Model Town",
+      "pincode": "110009"
+    }
+  },
+  {
+    "id": "CONST_METRO_016",
+    "name": "Metro Phase 4 - Janakpuri West to RK Ashram",
+    "type": "CONSTRUCTION_WORK",
+    "status": "Heavy Construction",
+    "description": "Underground tunneling and station construction. Road diversions in place at Haiderpur and Madhuban Chowk.",
+    "timelines": {
+      "announcement_date": "2019-01-01",
+      "construction_start": "2021-01-01",
+      "expected_completion": "2026-06-01",
+      "impact_start": "2025-01-01"
+    },
+    "impact": {
+      "score": -0.40,
+      "sentiment": "NEGATIVE",
+      "affected_sectors": ["Street Retail", "Local Transport"],
+      "radius_meters": 500
+    },
+    "location": {
+      "lat": 28.7032,
+      "lng": 77.1352,
+      "area_name": "Pitampura",
+      "pincode": "110034"
+    }
+  }
+]
