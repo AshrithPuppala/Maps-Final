@@ -17,17 +17,13 @@ services:
   - type: web
     name: delhi-business-frontend
     runtime: static
-    region: singapore
     plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     envVars:
       - key: VITE_BACKEND_URL
-        fromService:
-          type: web
-          name: delhi-business-backend
-          property: url
+        sync: false
       - key: VITE_MAPS_REIMAGINED_URL
         value: https://maps-reimagined-frontend.onrender.com
     routes:
