@@ -1,0 +1,84 @@
+import pandas as pd
+import numpy as np
+
+## --- 1. MOCK DATA SIMULATION ---
+# In a real scenario, this data would come from a database or a scraping job.
+# For the hackathon, this demonstrates the required data structure.
+def get_mock_office_data():
+    """Simulates extraction of office space data and proxies."""
+    data = {
+        'Location': ['Connaught Place', 'Nehru Place', 'Cyber City (Gurugram)', 'Saket', 'Okhla Industrial Area'],
+        'Avg_Rent_Per_SqFt': [150.0, 90.0, 110.0, 85.0, 60.0],  # Proxy for Real-Time Rent
+        'Metro_Connectivity_Score': [5, 4, 3, 4, 2],           # Proxy for Popularity/Access
+        'Foot_Traffic_Index': [0.9, 0.7, 0.8, 0.6, 0.4],       # Another Popularity/Vibrancy Proxy
+        'Previous_Occupier_Rating': [4.5, 4.0, 4.2, 3.8, 3.5]   # Synthetic Pop. Index (0-5 scale)
+    }
+    df = pd.DataFrame(data)
+    return df
+
+## --- 2. BUSINESS SUITABILITY ANALYSIS ---
+def calculate_suitability_score(df):
+    """
+    Calculates a weighted suitability score.
+    The weights must be justified in your hackathon presentation.
+    """
+    
+    # Define Weights (Adjust these for your model)
+    # Higher weight means more important for suitability
+    RENT_WEIGHT = 0.35      # Rent should negatively impact the score
+    POPULARITY_WEIGHT = 0.65 # Popularity (access, rating) should positively impact the score
+    
+    # 1. Normalize Rent (for an inverse relationship: lower rent = higher score)
+    # The max rent is subtracted by the current rent, then divided by the range.
+    max_rent = df['Avg_Rent_Per_SqFt'].max()
+    min_rent = df['Avg_Rent_Per_SqFt'].min()
+    
+    # Avoid division by zero if all rents are the same
+    rent_range = max_rent - min_rent if max_rent != min_rent else 1 
+
+    df['Normalized_Rent_Score'] = (max_rent - df['Avg_Rent_Per_SqFt']) / rent_range
+    
+    # 2. Calculate a combined Popularity Score
+    # We'll use a simple normalized average for the three proxies.
+    
+    # Normalize Proxies to a 0-1 scale
+    df['Norm_Metro'] = df['Metro_Connectivity_Score'] / df['Metro_Connectivity_Score'].max()
+    df['Norm_Traffic'] = df['Foot_Traffic_Index'] / df['Foot_Traffic_Index'].max()
+    df['Norm_Rating'] = df['Previous_Occupier_Rating'] / df['Previous_Occupier_Rating'].max()
+
+    # Combine them into a single Popularity Score
+    df['Combined_Popularity_Score'] = (df['Norm_Metro'] + df['Norm_Traffic'] + df['Norm_Rating']) / 3
+    
+    # 3. Calculate Final Business Suitability Score
+    # Formula: (Normalized_Rent_Score * RENT_WEIGHT) + (Combined_Popularity_Score * POPULARITY_WEIGHT)
+    df['Suitability_Score'] = (
+        df['Normalized_Rent_Score'] * RENT_WEIGHT
+    ) + (
+        df['Combined_Popularity_Score'] * POPULARITY_WEIGHT
+    )
+    
+    # Sort by the score to recommend the best places
+    df = df.sort_values(by='Suitability_Score', ascending=False)
+    
+    return df
+
+# --- EXECUTION ---
+if __name__ == '__main__':
+    # 1. Extract/Simulate Data
+    office_df = get_mock_office_data()
+    print("## 🏢 Initial Mock Data (Proxy Metrics)")
+    print(office_df[['Location', 'Avg_Rent_Per_SqFt', 'Previous_Occupier_Rating']])
+    print("-" * 50)
+    
+    # 2. Analyze and Score
+    results_df = calculate_suitability_score(office_df.copy())
+    
+    # 3. Present Results
+    print("## ✅ Business Suitability Analysis (Top Locations)")
+    final_cols = ['Location', 'Avg_Rent_Per_SqFt', 'Combined_Popularity_Score', 'Suitability_Score']
+    print(results_df[final_cols].round(2))
+    print("-" * 50)
+    
+    top_recommendation = results_df.iloc[0]
+    print(f"\n🥇 **Top Recommended Location for New Business:** {top_recommendation['Location']}")
+    print(f"   (Suitability Score: {top_recommendation['Suitability_Score']:.2f})")
