@@ -25,9 +25,14 @@ def load_geodata():
 def load_future_events():
     try:
         with open(os.path.join(DATA_DIR, 'delhi_future_events.json'), 'r') as f:
-            return json.load(f)
+            events = json.load(f)
+            print(f"✓ Successfully loaded {len(events)} future events")
+            # Debug: print first event
+            if events:
+                print(f"Sample event: {events[0]['name']} at ({events[0]['location']['lat']}, {events[0]['location']['lng']})")
+            return events
     except Exception as e:
-        print(f"Error loading future events: {e}")
+        print(f"❌ Error loading future events: {e}")
         return []
 
 city_gdf, areas_gdf = load_geodata()
@@ -45,7 +50,7 @@ DELHI_AREAS = [
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     """Calculate distance between two coordinates in meters"""
-    R = 6371000
+    R = 6371000  # Earth radius in meters
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     delta_phi = math.radians(lat2 - lat1)
     delta_lambda = math.radians(lon2 - lon1)
@@ -64,10 +69,22 @@ def geocode_location(area_name):
 def calculate_risk_score(positive_impacts, negative_impacts, location_factor):
     """Calculate risk score using the formula"""
     base_risk = 50
+    
+    # Calculate average impact scores
     avg_positive = sum([abs(e['impact']['score']) for e in positive_impacts]) / len(positive_impacts) if positive_impacts else 0
     avg_negative = sum([abs(e['impact']['score']) for e in negative_impacts]) / len(negative_impacts) if negative_impacts else 0
+    
+    # Apply formula: Base + (Negative * 40) - (Positive * 30) + Location
     risk = base_risk + (avg_negative * 40) - (avg_positive * 30) + location_factor
-    return max(0, min(100, round(risk, 2)))
+    
+    # Clamp between 0 and 100
+    risk = max(0, min(100, risk))
+    
+    print(f"📊 Risk Calculation:")
+    print(f"   Base: {base_risk}, Pos: {len(positive_impacts)} (avg={avg_positive:.2f}), Neg: {len(negative_impacts)} (avg={avg_negative:.2f})")
+    print(f"   Final Risk: {risk:.2f}%")
+    
+    return round(risk, 2)
 
 def generate_10year_projection(events, base_success_rate=60):
     """Generate 10-year success probability projection"""
@@ -148,20 +165,37 @@ def predict_feasibility():
         budget = float(data.get('investment', 0))
         business_type = data.get('type', 'Restaurant')
         
+        print(f"\n🎯 Analyzing location: ({lat}, {lng}) for {business_type}")
+        print(f"📍 Checking against {len(FUTURE_EVENTS)} events...")
+        
         # Find relevant events
         relevant_events = []
         for event in FUTURE_EVENTS:
-            distance = haversine_distance(lat, lng, event['location']['lat'], event['location']['lng'])
+            event_lat = event['location']['lat']
+            event_lng = event['location']['lng']
+            radius = event['impact']['radius_meters']
             
-            if distance <= event['impact']['radius_meters']:
+            distance = haversine_distance(lat, lng, event_lat, event_lng)
+            
+            print(f"   Event: {event['name']}")
+            print(f"   Distance: {distance:.0f}m, Radius: {radius}m")
+            
+            if distance <= radius:
                 event_copy = event.copy()
                 event_copy['distance_meters'] = round(distance, 2)
                 event_copy['distance_km'] = round(distance / 1000, 2)
                 relevant_events.append(event_copy)
+                print(f"   ✓ Event is within impact radius!")
+            else:
+                print(f"   ✗ Event is outside radius")
+        
+        print(f"\n✅ Found {len(relevant_events)} relevant events")
         
         # Separate positive and negative
         positive_impacts = [e for e in relevant_events if e['impact']['sentiment'] == 'POSITIVE']
         negative_impacts = [e for e in relevant_events if e['impact']['sentiment'] == 'NEGATIVE']
+        
+        print(f"   Positive: {len(positive_impacts)}, Negative: {len(negative_impacts)}")
         
         # Calculate risk
         location_factor = 0
@@ -216,7 +250,7 @@ def predict_feasibility():
         })
     
     except Exception as e:
-        print(f"Error in prediction: {e}")
+        print(f"❌ Error in prediction: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -246,4 +280,6 @@ def api_analyze():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    print(f"\n🚀 Starting Delhi Business Intelligence Backend on port {port}")
+    print(f"📊 Loaded {len(FUTURE_EVENTS)} events from database")
+    app.run(host='0.0.0.0', port=port, debug=True)
