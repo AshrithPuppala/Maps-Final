@@ -18,9 +18,11 @@ export default function App() {
   const [scoutData, setScoutData] = useState(null);
   const [predictData, setPredictData] = useState(null);
   const [mapPins, setMapPins] = useState([]);
+  
+  // State for Map Polygons
   const [geoData, setGeoData] = useState({ city: null, area: null });
 
-  // Load Map Polygons
+  // 1. Load Map Shapes on Mount
   useEffect(() => {
     const fetchGeoData = async () => {
       try {
@@ -265,7 +267,7 @@ export default function App() {
               </Marker>
             ))}
 
-            {/* Map Polygons */}
+            {/* Map Polygons Layer */}
             {geoData.city && (
               <Source id="delhi-city" type="geojson" data={geoData.city}>
                 <Layer id="city-fill" type="fill" paint={{ 'fill-color': '#3b82f6', 'fill-opacity': 0.05 }} />
