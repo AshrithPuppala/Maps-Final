@@ -49,13 +49,13 @@ export default function App() {
   };
 
   const handleSelect = (item) => {
-    setSelectedLocation({ lat: item.lat, lng: item.lon, name: item.name });
+    set({ lat: item.lat, lng: item.lon, name: item.name });
     setInputs(prev => ({ ...prev, query: item.name }));
     setSuggestions([]);
   };
 
   const runAnalysis = async () => {
-    if(!selectedLocation {
+    if(!selectedLocation) {
       return alert("Please Select a Location");
     }
     
