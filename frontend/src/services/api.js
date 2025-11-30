@@ -88,7 +88,7 @@ Note: The key must be set BEFORE building, not after deployment.
   try {
     console.log('✅ Initializing Gemini API...');
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     
     const compNames = competitors.map(c => c.name).join(", ");
     const prompt = `Act as a Business Strategist. I'm opening a ${type} at ${locationName} (${lat},${lng}). 
