@@ -152,7 +152,26 @@ def health():
         "status": "healthy",
         "service": "Delhi Business Intelligence Backend",
         "version": "3.0",
-        "events_loaded": len(FUTURE_EVENTS)
+        "events_loaded": len(FUTURE_EVENTS),
+        "data_dir": DATA_DIR,
+        "data_dir_exists": os.path.exists(DATA_DIR),
+        "json_file_path": os.path.join(DATA_DIR, 'delhi_future_events.json'),
+        "json_file_exists": os.path.exists(os.path.join(DATA_DIR, 'delhi_future_events.json'))
+    })
+
+@app.route('/debug/events', methods=['GET'])
+def debug_events():
+    """Debug endpoint to check events data"""
+    return jsonify({
+        "total_events": len(FUTURE_EVENTS),
+        "events_summary": [
+            {
+                "name": e['name'],
+                "location": e['location'],
+                "radius": e['impact']['radius_meters'],
+                "sentiment": e['impact']['sentiment']
+            } for e in FUTURE_EVENTS
+        ] if FUTURE_EVENTS else []
     })
 
 @app.route('/predict', methods=['POST'])
