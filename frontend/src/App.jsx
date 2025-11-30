@@ -45,11 +45,13 @@ export default function App() {
     if(q.length > 2) {
       const results = await API.searchLocationName(q);
       setSuggestions(results);
+    } else {
+      setSuggestions([]);
     }
   };
 
   const handleSelect = (item) => {
-    set({ lat: item.lat, lng: item.lon, name: item.name });
+    setSelectedLocation({ lat: item.lat, lng: item.lon, name: item.name });
     setInputs(prev => ({ ...prev, query: item.name }));
     setSuggestions([]);
   };
@@ -113,7 +115,7 @@ export default function App() {
 
     } catch (e) {
       console.error(e);
-      alert("Analysis failed. Please check your configuration.");
+      alert(`Analysis failed: ${e.message}`);
     } finally {
       setLoading(false);
     }
@@ -148,15 +150,22 @@ export default function App() {
         <div className="p-6 space-y-4 border-b border-slate-800 bg-slate-900">
 
           <div className="relative">
-            <MapPin className="absolute left-3 top-2.5 w-4 h-4 text-slate-500"/>
-            <input type="text" placeholder="Search Location (e.g. Sarojini Nagar)" value={inputs.query}
+            <MapPin className="absolute left-3 top-2.5 w-4 h-4 text-slate-500 pointer-events-none"/>
+            <input 
+              type="text" 
+              placeholder="Search Location (e.g. Sarojini Nagar)" 
+              value={inputs.query}
               onChange={e => handleSearch(e.target.value)}
               className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2 pl-9 pr-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             />
             {suggestions.length > 0 && (
               <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
                 {suggestions.map((s,i) => (
-                  <div key={i} onClick={() => handleSelect(s)} className="p-3 hover:bg-slate-700 text-sm cursor-pointer border-b border-slate-700/50 last:border-0">
+                  <div 
+                    key={i} 
+                    onClick={() => handleSelect(s)} 
+                    className="p-3 hover:bg-slate-700 text-sm cursor-pointer border-b border-slate-700/50 last:border-0"
+                  >
                     <div className="font-medium">{s.name}</div>
                     <div className="text-xs text-slate-500 truncate">{s.fullName}</div>
                   </div>
@@ -166,18 +175,27 @@ export default function App() {
           </div>
 
           <div className="flex gap-2">
-            <select value={inputs.type} onChange={e => setInputs({...inputs, type: e.target.value})} 
-              className="bg-slate-800 border border-slate-700 rounded-lg text-sm px-3 py-2 flex-1 outline-none">
-              {['Restaurant', 'Cafe', 'Gym', 'Hotel', 'Pharmacy'].map(t => <option key={t}>{t}</option>)}
+            <select 
+              value={inputs.type} 
+              onChange={e => setInputs({...inputs, type: e.target.value})} 
+              className="bg-slate-800 border border-slate-700 rounded-lg text-sm px-3 py-2 flex-1 outline-none cursor-pointer"
+            >
+              {['Restaurant', 'Cafe', 'Gym', 'Hotel', 'Pharmacy'].map(t => <option key={t} value={t}>{t}</option>)}
             </select>
-            <input type="number" placeholder="Budget (₹)" value={inputs.budget} 
+            <input 
+              type="number" 
+              placeholder="Budget (₹)" 
+              value={inputs.budget} 
               onChange={e => setInputs({...inputs, budget: e.target.value})}
               className="bg-slate-800 border border-slate-700 rounded-lg text-sm px-3 py-2 w-32 outline-none" 
             />
           </div>
 
-          <button onClick={runAnalysis} disabled={loading} 
-            className="w-full bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 text-white font-medium py-3 rounded-lg transition-all flex justify-center items-center gap-2 shadow-lg">
+          <button 
+            onClick={runAnalysis} 
+            disabled={loading} 
+            className="w-full bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-lg transition-all flex justify-center items-center gap-2 shadow-lg"
+          >
             {loading ? <><Loader2 className="animate-spin w-4 h-4"/> Analyzing...</> : <><Search className="w-4 h-4"/> Run Complete Analysis</>}
           </button>
         </div>
@@ -226,7 +244,7 @@ export default function App() {
 
                   <div>
                     <h3 className="text-sm font-bold text-slate-300 mb-3">Nearby Competitors</h3>
-                    {scoutData.finalPins.length > 0 ? (
+                    {scoutData.finalPins && scoutData.finalPins.length > 0 ? (
                       scoutData.finalPins.map((c, i) => (
                         <div key={i} className="flex justify-between items-center p-3 mb-2 bg-slate-800 rounded-lg border border-slate-700 hover:border-slate-600 transition-all">
                           <div>
@@ -235,7 +253,7 @@ export default function App() {
                           </div>
                           <div className="flex items-center gap-1 bg-slate-900 px-2 py-1 rounded">
                             <span className="text-yellow-400 text-xs">★</span>
-                            <span className="text-xs font-bold">{c.rating}</span>
+                            <span className="text-xs font-bold">{c.rating || 'N/A'}</span>
                           </div>
                         </div>
                       ))
