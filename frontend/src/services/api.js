@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 // API Configuration - CRITICAL: Use your actual backend URL
 export const API_CONFIG = {
   BACKEND_URL: import.meta.env.VITE_BACKEND_URL || 'https://maps-final.onrender.com',
-  GEMINI_API_KEY: import.meta.env.VITE_GEMINI_API_KEY
+  GEMINI_API_KEY: import.meta.env.VITE_GEMINI_API_KEY || ''
 };
 
 // 1. Nominatim Geocoding
@@ -18,13 +18,22 @@ export const searchLocationName = async (query) => {
       lat: parseFloat(item.lat),
       lon: parseFloat(item.lon)
     }));
-  } catch (e) { return []; }
+  } catch (e) { 
+    console.error("Geocoding error:", e);
+    return []; 
+  }
 };
 
 // 2. OpenStreetMap Competitors
 export const fetchCompetitors = async (lat, lng, type) => {
   try {
-    const typeMap = { 'Restaurant': 'amenity=restaurant', 'Cafe': 'amenity=cafe', 'Gym': 'leisure=fitness_centre', 'Pharmacy': 'amenity=pharmacy', 'Hotel': 'tourism=hotel' };
+    const typeMap = { 
+      'Restaurant': 'amenity=restaurant', 
+      'Cafe': 'amenity=cafe', 
+      'Gym': 'leisure=fitness_centre', 
+      'Pharmacy': 'amenity=pharmacy', 
+      'Hotel': 'tourism=hotel' 
+    };
     const tag = typeMap[type] || 'amenity=restaurant';
     const query = `[out:json][timeout:25];(node[${tag}](around:3000,${lat},${lng});way[${tag}](around:3000,${lat},${lng}););out center 15;`;
     
@@ -36,34 +45,45 @@ export const fetchCompetitors = async (lat, lng, type) => {
         lat: p.lat || p.center?.lat,
         lon: p.lon || p.center?.lon
     })).filter(p => p.name !== "Unknown").slice(0,10) : [];
-  } catch (e) { return []; }
+  } catch (e) { 
+    console.error("Competitors fetch error:", e);
+    return []; 
+  }
 };
 
 // 3. Gemini Analysis
 export const analyzeWithGemini = async (type, lat, lng, locationName, competitors) => {
-  if (!API_CONFIG.GEMINI_API_KEY) {
-    throw new Error("Gemini API key not configured. Please set VITE_GEMINI_API_KEY environment variable.");
+  const apiKey = API_CONFIG.GEMINI_API_KEY;
+  
+  if (!apiKey || apiKey.trim() === '') {
+    console.error("❌ Gemini API key not configured!");
+    throw new Error("Gemini API key not configured. Please set VITE_GEMINI_API_KEY environment variable in Render.");
   }
   
-  const genAI = new GoogleGenerativeAI(API_CONFIG.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-  
-  const compNames = competitors.map(c => c.name).join(", ");
-  const prompt = `Act as a Business Strategist. I'm opening a ${type} at ${locationName} (${lat},${lng}). 
-  Real competitors nearby: [${compNames}].
-  
-  Return valid JSON:
-  {
-    "summary": "2 sentence strategic summary",
-    "swot": { "strengths": ["s1","s2"], "weaknesses": ["w1","w2"] },
-    "market_grade": "A/B/C",
-    "competitors_enriched": [
-       // Enrich the list I gave you with estimated rating (3.5-4.8) and address
-       { "name": "competitor name", "rating": 4.5, "address": "Short address" }
-    ]
-  }`;
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    
+    const compNames = competitors.map(c => c.name).join(", ");
+    const prompt = `Act as a Business Strategist. I'm opening a ${type} at ${locationName} (${lat},${lng}). 
+Real competitors nearby: [${compNames}].
 
-  const res = await model.generateContent(prompt);
-  const text = res.response.text();
-  return JSON.parse(text.replace(/```json|```/g, '').trim());
+Return valid JSON:
+{
+  "summary": "2 sentence strategic summary",
+  "swot": { "strengths": ["s1","s2"], "weaknesses": ["w1","w2"] },
+  "market_grade": "A/B/C",
+  "competitors_enriched": [
+     // Enrich the list I gave you with estimated rating (3.5-4.8) and address
+     { "name": "competitor name", "rating": 4.5, "address": "Short address" }
+  ]
+}`;
+
+    const res = await model.generateContent(prompt);
+    const text = res.response.text();
+    return JSON.parse(text.replace(/```json|```/g, '').trim());
+  } catch (error) {
+    console.error("Gemini API error:", error);
+    throw new Error(`Gemini analysis failed: ${error.message}`);
+  }
 };
