@@ -2,7 +2,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // API Configuration - CRITICAL: Use your actual backend URL
 export const API_CONFIG = {
-  BACKEND_URL: import.meta.env.VITE_BACKEND_URL || 'https://maps-final.onrender.com'
+  BACKEND_URL: import.meta.env.VITE_BACKEND_URL || 'https://maps-final.onrender.com',
+  GEMINI_API_KEY: import.meta.env.VITE_GEMINI_API_KEY
 };
 
 // 1. Nominatim Geocoding
@@ -39,8 +40,12 @@ export const fetchCompetitors = async (lat, lng, type) => {
 };
 
 // 3. Gemini Analysis
-export const analyzeWithGemini = async (apiKey, type, lat, lng, locationName, competitors) => {
-  const genAI = new GoogleGenerativeAI(apiKey);
+export const analyzeWithGemini = async (type, lat, lng, locationName, competitors) => {
+  if (!API_CONFIG.GEMINI_API_KEY) {
+    throw new Error("Gemini API key not configured. Please set VITE_GEMINI_API_KEY environment variable.");
+  }
+  
+  const genAI = new GoogleGenerativeAI(API_CONFIG.GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
   
   const compNames = competitors.map(c => c.name).join(", ");
