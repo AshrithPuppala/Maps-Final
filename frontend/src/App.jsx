@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Map, { NavigationControl, Marker, Source, Layer } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { MapPin, Search, Loader2, TrendingUp, AlertTriangle, Key, DollarSign, Building2, Map as MapIcon, Calendar, Target } from 'lucide-react';
+import { MapPin, Search, Loader2, TrendingUp, AlertTriangle, DollarSign, Building2, Map as MapIcon, Calendar, Target } from 'lucide-react';
 import * as API from './services/api';
 import { API_CONFIG } from './services/api';
 
@@ -12,8 +12,7 @@ export default function App() {
   const [inputs, setInputs] = useState({ 
     query: '', 
     type: 'Restaurant', 
-    budget: '2000000', 
-    apiKey: '' 
+    budget: '2000000',  
   });
   
   const [suggestions, setSuggestions] = useState([]);
@@ -57,7 +56,7 @@ export default function App() {
 
   const runAnalysis = async () => {
     if(!selectedLocation || !inputs.apiKey) {
-      return alert("Location and API Key required!");
+      return alert("Please Select a Location");
     }
     
     setLoading(true);
@@ -98,7 +97,7 @@ export default function App() {
       }
 
       const geminiAnalysis = await API.analyzeWithGemini(
-        inputs.apiKey, inputs.type, selectedLocation.lat, selectedLocation.lng, selectedLocation.name, osmCompetitors
+        inputs.type, selectedLocation.lat, selectedLocation.lng, selectedLocation.name, osmCompetitors
       );
 
       const finalPins = osmCompetitors.length > 0 
@@ -114,7 +113,7 @@ export default function App() {
 
     } catch (e) {
       console.error(e);
-      alert("Analysis failed. Please check your API Key.");
+      alert("Analysis failed. Please check your configuration.");
     } finally {
       setLoading(false);
     }
@@ -147,13 +146,6 @@ export default function App() {
         </div>
 
         <div className="p-6 space-y-4 border-b border-slate-800 bg-slate-900">
-          <div className="relative">
-            <Key className="absolute left-3 top-2.5 w-4 h-4 text-slate-500"/>
-            <input type="password" placeholder="Gemini API Key" value={inputs.apiKey} 
-              onChange={e => setInputs({...inputs, apiKey: e.target.value})}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2 pl-9 pr-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
-            />
-          </div>
 
           <div className="relative">
             <MapPin className="absolute left-3 top-2.5 w-4 h-4 text-slate-500"/>
