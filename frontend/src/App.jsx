@@ -55,7 +55,7 @@ export default function App() {
   };
 
   const runAnalysis = async () => {
-    if(!selectedLocation || !inputs.apiKey) {
+    if(!selectedLocation {
       return alert("Please Select a Location");
     }
     
