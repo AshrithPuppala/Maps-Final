@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delhi Business Intelligence Suite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    .app-container { display: none; height: calc(100vh - 130px); overflow-y: auto; }
+    .app-container.active { display: block; }
+    .custom-marker { pointer-events: auto; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div id="root">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+      <div class="max-w-7xl mx-auto px-4 py-4">
+        <h1 class="text-2xl font-bold">🚀 Delhi Business Intelligence Suite</h1>
+        <p class="text-indigo-100 text-sm">Unified Market Analysis Platform</p>
+      </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="bg-white shadow-md border-b-2 border-gray-200">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex space-x-1">
+          <button onclick="switchApp('ncr')" id="tab-ncr" class="px-6 py-3 font-semibold border-b-4 border-indigo-600 text-indigo-600 bg-indigo-50">
+            📍 NCR Location Analyzer
+          </button>
+          <button onclick="switchApp('app2')" id="tab-app2" class="px-6 py-3 font-semibold border-b-4 border-transparent text-gray-600 hover:text-indigo-600 hover:bg-indigo-50">
+            📊 Market Analytics
+          </button>
+          <button onclick="switchApp('app3')" id="tab-app3" class="px-6 py-3 font-semibold border-b-4 border-transparent text-gray-600 hover:text-indigo-600 hover:bg-indigo-50">
+            📈 Business Dashboard
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- App 1: NCR Location Analyzer -->
+    <div id="app-ncr" class="app-container active">
+      <div id="ncr-root"></div>
+    </div>
+
+    <!-- App 2: Market Analytics Placeholder -->
+    <div id="app-app2" class="app-container">
+      <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div class="text-6xl mb-4">📊</div>
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">Market Analytics</h2>
+          <p class="text-gray-600 mb-6">Advanced market analysis and competitive intelligence tools</p>
+          <div class="grid md:grid-cols-3 gap-6 mt-8">
+            <div class="bg-blue-50 p-6 rounded-xl">
+              <div class="text-3xl mb-2">📈</div>
+              <h3 class="font-bold text-lg mb-2">Trend Analysis</h3>
+              <p class="text-sm text-gray-600">Real-time market trends and insights</p>
+            </div>
+            <div class="bg-green-50 p-6 rounded-xl">
+              <div class="text-3xl mb-2">💰</div>
+              <h3 class="font-bold text-lg mb-2">Financial Metrics</h3>
+              <p class="text-sm text-gray-600">Revenue and cost optimization</p>
+            </div>
+            <div class="bg-purple-50 p-6 rounded-xl">
+              <div class="text-3xl mb-2">🎯</div>
+              <h3 class="font-bold text-lg mb-2">Target Markets</h3>
+              <p class="text-sm text-gray-600">Identify and analyze opportunities</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- App 3: Business Dashboard Placeholder -->
+    <div id="app-app3" class="app-container">
+      <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div class="text-6xl mb-4">📈</div>
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">Business Dashboard</h2>
+          <p class="text-gray-600 mb-6">Comprehensive business performance monitoring</p>
+          <div class="grid md:grid-cols-2 gap-6 mt-8">
+            <div class="bg-indigo-50 p-6 rounded-xl text-left">
+              <div class="text-3xl mb-2">⚡</div>
+              <h3 class="font-bold text-lg mb-2">Real-time KPIs</h3>
+              <p class="text-sm text-gray-600">Monitor key performance indicators across all business units</p>
+            </div>
+            <div class="bg-orange-50 p-6 rounded-xl text-left">
+              <div class="text-3xl mb-2">📊</div>
+              <h3 class="font-bold text-lg mb-2">Custom Reports</h3>
+              <p class="text-sm text-gray-600">Generate detailed analytics reports on demand</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Tab Switching -->
+  <script>
+    function switchApp(appId) {
+      // Hide all apps
+      document.querySelectorAll('.app-container').forEach(app => {
+        app.classList.remove('active');
+      });
+      
+      // Reset all tabs
+      document.querySelectorAll('nav button').forEach(button => {
+        button.classList.remove('border-indigo-600', 'text-indigo-600', 'bg-indigo-50');
+        button.classList.add('border-transparent', 'text-gray-600');
+      });
+      
+      // Show selected app
+      document.getElementById(app-${appId}).classList.add('active');
+      
+      // Activate selected tab
+      const activeTab = document.getElementById(tab-${appId});
+      activeTab.classList.remove('border-transparent', 'text-gray-600');
+      activeTab.classList.add('border-indigo-600', 'text-indigo-600', 'bg-indigo-50');
+      
+      // Save preference
+      localStorage.setItem('activeApp', appId);
+    }
+    
+    // Restore last active app
+    window.addEventListener('DOMContentLoaded', () => {
+      const lastApp = localStorage.getItem('activeApp') || 'ncr';
+      switchApp(lastApp);
+    });
+  </script>
+
+  <!-- NCR Business Analyzer Component -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const IconWrapper = ({ children }) => <span>{children}</span>;
+    const Building2 = () => <IconWrapper>🏢</IconWrapper>;
+    const Package = () => <IconWrapper>📦</IconWrapper>;
+    const MapPin = () => <IconWrapper>📍</IconWrapper>;
+    const TrendingUp = () => <IconWrapper>📈</IconWrapper>;
+    const Clock = () => <IconWrapper>⏰</IconWrapper>;
+    const Users = () => <IconWrapper>👥</IconWrapper>;
+    const BarChart3 = () => <IconWrapper>📊</IconWrapper>;
+
+    function NCRBusinessAnalyzer() {
+      const [selectedBusiness, setSelectedBusiness] = useState('');
+      const [analysisData, setAnalysisData] = useState(null);
+      const [showMap, setShowMap] = useState(false);
+      const [mapLoaded, setMapLoaded] = useState(false);
+
+      const mapContainerRef = useRef(null);
+      const mapInstanceRef = useRef(null);
+      const markersLayerRef = useRef(null);
+
+      const businessCategories = {
+        Grocery: { talent: 0.2, cost: 0.3, procurement: 0.35, timing: 0.15 },
+        Restaurant: { talent: 0.35, cost: 0.2, procurement: 0.25, timing: 0.2 },
+        Cafe: { talent: 0.3, cost: 0.25, procurement: 0.2, timing: 0.25 },
+        'Retail Store': { talent: 0.25, cost: 0.3, procurement: 0.3, timing: 0.15 },
+        Supermarket: { talent: 0.2, cost: 0.25, procurement: 0.4, timing: 0.15 },
+        Pharmacy: { talent: 0.25, cost: 0.3, procurement: 0.35, timing: 0.1 },
+        Gym: { talent: 0.4, cost: 0.25, procurement: 0.15, timing: 0.2 },
+        'Fitness Center': { talent: 0.45, cost: 0.25, procurement: 0.1, timing: 0.2 },
+        Salon: { talent: 0.4, cost: 0.3, procurement: 0.15, timing: 0.15 },
+        Spa: { talent: 0.45, cost: 0.25, procurement: 0.15, timing: 0.15 },
+        'Electronics Store': { talent: 0.3, cost: 0.3, procurement: 0.3, timing: 0.1 },
+        'Clothing Store': { talent: 0.3, cost: 0.3, procurement: 0.25, timing: 0.15 },
+        Bakery: { talent: 0.35, cost: 0.25, procurement: 0.3, timing: 0.1 },
+        Bookstore: { talent: 0.25, cost: 0.35, procurement: 0.25, timing: 0.15 },
+        'Medical Clinic': { talent: 0.5, cost: 0.25, procurement: 0.15, timing: 0.1 },
+        Hospital: { talent: 0.45, cost: 0.2, procurement: 0.25, timing: 0.1 },
+        School: { talent: 0.5, cost: 0.3, procurement: 0.1, timing: 0.1 }
+      };
+
+      const microMarketData = [
+        { name: 'Delhi CBD (Connaught Place)', rent: 284.45, vacancy: 18.3, absorption: 0.05, stock: 1.53, metroDistanceKm: 0.5, busDistanceKm: 0.2, rating: 4.5, college: 4, corporate: 5, timing: 'Standard B2B Day (10am-7pm)', timingDetail: 'Efficiency: 11:30 am - 5:00 pm.' },
+        { name: 'Cyber City (Gurugram)', rent: 135.0, vacancy: 2.2, absorption: 0.1, stock: 13.99, metroDistanceKm: 1.2, busDistanceKm: 0.6, rating: 4.7, college: 3, corporate: 5, timing: 'Corporate B2B Day (9am-6pm)', timingDetail: 'Efficiency: 10:00 am - 5:00 pm.' },
+        { name: 'South-East Delhi (Nehru Place)', rent: 115.6, vacancy: 13.0, absorption: 0.08, stock: 7.09, metroDistanceKm: 0.8, busDistanceKm: 0.3, rating: 3.8, college: 5, corporate: 4, timing: 'Retail/Tech Day (11am-8pm)', timingDetail: 'Efficiency: 3:00 pm - 8:00 pm.' },
+        { name: 'Noida Expressway (Sect 125/135)', rent: 75.0, vacancy: 12.0, absorption: 0.85, stock: 10.5, metroDistanceKm: 4.0, busDistanceKm: 2.5, rating: 3.5, college: 4, corporate: 4, timing: 'Tech/Flex Day (10am-7pm)', timingDetail: 'Efficiency: 11:00 am - 6:00 pm.' },
+        { name: 'Golf Course Road (Gurugram)', rent: 110.5, vacancy: 11.5, absorption: 0.35, stock: 5.5, metroDistanceKm: 2.0, busDistanceKm: 0.8, rating: 4.5, college: 2, corporate: 5, timing: 'Corporate B2B Day (9am-6pm)', timingDetail: 'Efficiency: 10:00 am - 5:00 pm.' },
+        { name: 'Sector 62 (Noida)', rent: 85.5, vacancy: 16.0, absorption: 0.45, stock: 4.5, metroDistanceKm: 3.2, busDistanceKm: 1.0, rating: 4.1, college: 5, corporate: 3, timing: 'Retail/Tech Day (11am-8pm)', timingDetail: 'Efficiency: 3:00 pm - 8:00 pm.' },
+        { name: 'Sector 16 (Noida)', rent: 99.0, vacancy: 10.5, absorption: 0.1, stock: 2.0, metroDistanceKm: 1.1, busDistanceKm: 0.4, rating: 4.0, college: 5, corporate: 3, timing: 'Retail/Tech Day (11am-8pm)', timingDetail: 'Efficiency: 3:00 pm - 8:00 pm.' },
+        { name: 'Sector 18 (Noida)', rent: 120.0, vacancy: 14.0, absorption: 0.05, stock: 0.9, metroDistanceKm: 1.4, busDistanceKm: 0.5, rating: 4.4, college: 4, corporate: 4, timing: 'Retail/Tech Day (11am-8pm)', timingDetail: 'Efficiency: 3:00 pm - 8:00 pm.' },
+        { name: 'Laxmi Nagar (East Delhi)', rent: 82.0, vacancy: 9.0, absorption: 0.15, stock: 0.7, metroDistanceKm: 0.6, busDistanceKm: 0.2, rating: 3.7, college: 5, corporate: 2, timing: 'Retail/Tech Day (11am-8pm)', timingDetail: 'Efficiency: 3:00 pm - 8:00 pm.' },
+        { name: 'Central Noida (Sector 58/63)', rent: 70.0, vacancy: 22.0, absorption: 0.6, stock: 3.8, metroDistanceKm: 3.8, busDistanceKm: 1.8, rating: 3.6, college: 4, corporate: 4, timing: 'Tech/Flex Day (10am-7pm)', timingDetail: 'Efficiency: 11:00 am - 6:00 pm.' }
+      ];
+
+      const normalize = (value, min, max, inverse = false) => {
+        if (max === min) return 0.5;
+        const normalized = (value - min) / (max - min);
+        return inverse ? 1 - normalized : normalized;
+      };
+
+      const calculateScores = (businessType) => {
+        const weights = businessCategories[businessType];
+        if (!weights) return null;
+
+        const rentValues = microMarketData.map((m) => m.rent);
+        const vacancyValues = microMarketData.map((m) => m.vacancy);
+        const absorptionValues = microMarketData.map((m) => m.absorption);
+        const stockValues = microMarketData.map((m) => m.stock);
+        const metroDistValues = microMarketData.map((m) => m.metroDistanceKm);
+        const busDistValues = microMarketData.map((m) => m.busDistanceKm);
+
+        const minRent = Math.min(...rentValues);
+        const maxRent = Math.max(...rentValues);
+        const minVacancy = Math.min(...vacancyValues);
+        const maxVacancy = Math.max(...vacancyValues);
+        const minAbsorption = Math.min(...absorptionValues);
+        const maxAbsorption = Math.max(...absorptionValues);
+        const minStock = Math.min(...stockValues);
+        const maxStock = Math.max(...stockValues);
+        const minMetroDist = Math.min(...metroDistValues);
+        const maxMetroDist = Math.max(...metroDistValues);
+        const minBusDist = Math.min(...busDistValues);
+        const maxBusDist = Math.max(...busDistValues);
+
+        const scoredMarkets = microMarketData.map((market) => {
+          const metroAccess = normalize(market.metroDistanceKm, minMetroDist, maxMetroDist, true);
+          const busAccess = normalize(market.busDistanceKm, minBusDist, maxBusDist, true);
+          const talentScore = (
+            normalize(market.college, 1, 5) * 0.45 +
+            ((metroAccess * 0.6) + (busAccess * 0.4)) * 0.35 +
+            normalize(market.rating, 2.8, 4.7) * 0.2
+          ) * weights.talent;
+
+          const costScore = (
+            normalize(market.rent, minRent, maxRent, true) * 0.7 +
+            normalize(market.vacancy, minVacancy, maxVacancy, true) * 0.3
+          ) * weights.cost;
+
+          const procurementScore = (
+            normalize(market.absorption, minAbsorption, maxAbsorption) * 0.4 +
+            normalize(market.stock, minStock, maxStock) * 0.3 +
+            normalize(market.corporate, 1, 5) * 0.3
+          ) * weights.procurement;
+
+          const timingScore = (
+            (metroAccess * 0.5) + (normalize(market.rating, 2.8, 4.7) * 0.5)
+          ) * weights.timing;
+
+          const totalScore = talentScore + costScore + procurementScore + timingScore;
+
+          return { ...market, talentScore, costScore, procurementScore, timingScore, totalScore, normalizedScore: totalScore * 100 };
+        });
+
+        return scoredMarkets.sort((a, b) => b.totalScore - a.totalScore);
+      };
+
+      const getApproximateCoords = (name) => {
+        const coordMap = {
+          'Delhi CBD (Connaught Place)': [28.6289, 77.2065],
+          'Cyber City (Gurugram)': [28.495, 77.089],
+          'South-East Delhi (Nehru Place)': [28.5494, 77.2501],
+          'Noida Expressway (Sect 125/135)': [28.5418, 77.392],
+          'Golf Course Road (Gurugram)': [28.442, 77.057],
+          'Sector 62 (Noida)': [28.6267, 77.3617],
+          'Sector 16 (Noida)': [28.5706, 77.3272],
+          'Sector 18 (Noida)': [28.5677, 77.3206],
+          'Laxmi Nagar (East Delhi)': [28.6357, 77.2777],
+          'Central Noida (Sector 58/63)': [28.605, 77.364]
+        };
+        return coordMap[name] || null;
+      };
+
+      const createMap = () => {
+        if (!window.L || !mapContainerRef.current) return;
+
+        if (mapInstanceRef.current) {
+          try { mapInstanceRef.current.remove(); } catch (e) {}
+          mapInstanceRef.current = null;
+        }
+
+        try {
+          const map = L.map(mapContainerRef.current, {
+            center: [28.6139, 77.209],
+            zoom: 10
+          });
+
+          L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap',
+            maxZoom: 19
+          }).addTo(map);
+
+          const markersLayer = L.layerGroup().addTo(map);
+          markersLayerRef.current = markersLayer;
+
+          if (analysisData && analysisData.length > 0) {
+            const bounds = [];
+            analysisData.slice(0, 5).forEach((market, idx) => {
+              const coords = getApproximateCoords(market.name);
+              if (!coords) return;
+              bounds.push(coords);
+
+              const iconColor = idx === 0 ? '#10b981' : idx === 1 ? '#3b82f6' : '#6366f1';
+              const customIcon = L.divIcon({
+                className: 'custom-marker',
+                html: <div style="background-color: ${iconColor}; width: 34px; height: 34px; border-radius: 50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; border:3px solid white;">${idx + 1}</div>,
+                iconSize: [34, 34],
+                iconAnchor: [17, 17]
+              });
+
+              const marker = L.marker(coords, { icon: customIcon }).addTo(markersLayer);
+              marker.bindPopup(`
+                <div style="font-family:sans-serif; min-width:200px;">
+                  <div style="font-weight:bold; font-size:16px; margin-bottom:8px; color:${iconColor};">#${idx + 1} ${market.name}</div>
+                  <div style="margin-bottom:4px;"><strong>Score:</strong> ${market.normalizedScore.toFixed(1)}/100</div>
+                  <div style="margin-bottom:4px;"><strong>Rent:</strong> ₹${market.rent}/sqft</div>
+                  <div style="margin-bottom:4px;"><strong>Vacancy:</strong> ${market.vacancy}%</div>
+                  <div style="font-size:12px; color:#666; margin-top:8px;">${market.timing}</div>
+                </div>
+              `);
+            });
+
+            if (bounds.length > 0) map.fitBounds(bounds, { padding: [50, 50] });
+          }
+
+          mapInstanceRef.current = map;
+          setMapLoaded(true);
+          setTimeout(() => { try { map.invalidateSize(); } catch (e) {} }, 100);
+        } catch (error) {
+          console.error('Map error:', error);
+        }
+      };
+
+      useEffect(() => {
+        if (showMap) {
+          createMap();
+        } else {
+          if (mapInstanceRef.current) {
+            try { mapInstanceRef.current.remove(); } catch (e) {}
+            mapInstanceRef.current = null;
+          }
+        }
+      }, [showMap, analysisData]);
+
+      useEffect(() => {
+        return () => {
+          if (mapInstanceRef.current) {
+            try { mapInstanceRef.current.remove(); } catch (e) {}
+          }
+        };
+      }, []);
+
+      const handleBusinessSelect = (business) => {
+        setSelectedBusiness(business);
+        const scores = calculateScores(business);
+        setAnalysisData(scores);
+        setShowMap(false);
+      };
+
+      const getScoreColor = (score) => {
+        if (score >= 80) return 'text-green-600';
+        if (score >= 60) return 'text-blue-600';
+        if (score >= 40) return 'text-yellow-600';
+        return 'text-orange-600';
+      };
+
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+          {!selectedBusiness && (
+            <div className="max-w-7xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-xl p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                  <Package /> Select Your Business Type
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {Object.keys(businessCategories).map((business) => (
+                    <button
+                      key={business}
+                      onClick={() => handleBusinessSelect(business)}
+                      className="p-4 border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-all text-left group"
+                    >
+                      <div className="font-semibold text-gray-900 group-hover:text-indigo-600">{business}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {selectedBusiness && analysisData && (
+            <div className="max-w-7xl mx-auto space-y-6">
+              <div className="bg-white rounded-2xl shadow-xl p-6">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Analysis for: <span className="text-indigo-600">{selectedBusiness}</span>
+                    </h2>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowMap(!showMap)}
+                      className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                    >
+                      <MapPin /> {showMap ? 'Hide Map' : 'Show Map'}
+                    </button>
+                    <button
+                      onClick={() => { setSelectedBusiness(''); setAnalysisData(null); setShowMap(false); }}
+                      className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                      Change Business
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {showMap && (
+                <div className="bg-white rounded-2xl shadow-xl p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <MapPin /> Interactive Location Map - Top 5
+                  </h3>
+                  <div ref={mapContainerRef} className="w-full h-[500px] rounded-lg border-2 border-gray-200 bg-gray-100"></div>
+                </div>
+              )}
+
+              <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl shadow-xl p-8 text-white">
+                <h3 className="text-2xl font-bold mb-2">🏆 Top Recommended Location</h3>
+                <h4 className="text-3xl font-bold mb-4">{analysisData[0].name}</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <div className="text-sm opacity-90">Overall Score</div>
+                    <div className="text-2xl font-bold">{analysisData[0].normalizedScore.toFixed(1)}/100</div>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <div className="text-sm opacity-90">Rent per SqFt</div>
+                    <div className="text-2xl font-bold">₹{analysisData[0].rent}</div>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <div className="text-sm opacity-90">Vacancy Rate</div>
+                    <div className="text-2xl font-bold">{analysisData[0].vacancy}%</div>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <div className="text-sm opacity-90">Metro Distance</div>
+                    <div className="text-2xl font-bold">{analysisData[0].metroDistanceKm} km</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-xl p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                  <BarChart3 /> Detailed Market Rankings
+                </h3>
+                <div className="space-y-4">
+                  {analysisData.map((market, idx) => (
+                    <div key={market.name} className="border-2 border-gray-200 rounded-xl p-6 hover:border-indigo-300 transition-all">
+                      <div className="flex items-start justify-between gap-4 mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="text-2xl font-bold text-indigo-600">#{idx + 1}</span>
+                            <h4 className="text-xl font-bold text-gray-900">{market.name}</h4>
+                          </div>
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <Clock /> <span className="text-sm">{market.timing}</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm text-gray-600">Score
