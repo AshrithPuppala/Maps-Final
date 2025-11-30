@@ -1,8 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// API Configuration
+// API Configuration - CRITICAL: Use your actual backend URL
 export const API_CONFIG = {
-  BACKEND_URL: import.meta.env.VITE_BACKEND_URL || 'https://your-backend-service.onrender.com'
+  BACKEND_URL: import.meta.env.VITE_BACKEND_URL || 'https://maps-final.onrender.com'
 };
 
 // 1. Nominatim Geocoding
@@ -41,7 +41,7 @@ export const fetchCompetitors = async (lat, lng, type) => {
 // 3. Gemini Analysis
 export const analyzeWithGemini = async (apiKey, type, lat, lng, locationName, competitors) => {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
   
   const compNames = competitors.map(c => c.name).join(", ");
   const prompt = `Act as a Business Strategist. I'm opening a ${type} at ${locationName} (${lat},${lng}). 
